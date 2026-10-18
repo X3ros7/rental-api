@@ -19,18 +19,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.12.0
           cache: npm
           cache-dependency-path: website/package-lock.json
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5
 
       - name: Install dependencies
         working-directory: website
@@ -40,13 +37,15 @@ jobs:
         working-directory: website
         run: npm run build
 
-      - name: Add 404 fallback
-        run: cp website/dist/index.html website/dist/404.html
+      - name: Inspect build output
+        run: find website -maxdepth 4 -name index.html -not -path '*/node_modules/*' -print
 
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v3
+      - name: Prepare 404 page
+        run: cp website/dist/client/index.html website/dist/client/404.html
+
+      - uses: actions/upload-pages-artifact@v3
         with:
-          path: website/dist
+          path: website/dist/client
 
   deploy:
     needs: build
