@@ -42,7 +42,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: website/dist
+          path: website/dist/rental-api
 
   deploy:
     needs: build
@@ -51,6 +51,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
