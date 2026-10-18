@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.12.0
+          node-version: 22
           cache: npm
           cache-dependency-path: website/package-lock.json
 
@@ -37,15 +37,12 @@ jobs:
         working-directory: website
         run: npm run build
 
-      - name: Inspect build output
-        run: find website -maxdepth 4 -name index.html -not -path '*/node_modules/*' -print
-
-      - name: Prepare 404 page
-        run: cp website/dist/client/index.html website/dist/client/404.html
+      - name: Add 404 fallback
+        run: cp website/dist/rental-api/index.html website/dist/rental-api/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: website/dist/client
+          path: website/dist
 
   deploy:
     needs: build
