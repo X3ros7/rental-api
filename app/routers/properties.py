@@ -1,3 +1,7 @@
+"""@package app.routers.properties
+@brief CRUD endpoints for rental properties, including list filters.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -18,6 +22,18 @@ def list_properties(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> list[Property]:
+    """@brief List properties with optional filters.
+
+    Supported query parameters: ``city``, ``minPrice``, ``maxPrice``, ``available``.
+
+    @param city Filter by city (case-insensitive exact match).
+    @param minPrice Minimum monthly price (inclusive).
+    @param maxPrice Maximum monthly price (inclusive).
+    @param available Filter by availability flag.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return List of matching properties ordered by ID.
+    """
     query = db.query(Property)
 
     if city is not None:
@@ -38,6 +54,14 @@ def get_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Property:
+    """@brief Get a property by ID.
+
+    @param property_id Property identifier.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Requested property.
+    @raises HTTPException 404 if the property does not exist.
+    """
     property_obj = db.get(Property, property_id)
     if property_obj is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
@@ -50,6 +74,13 @@ def create_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Property:
+    """@brief Create a new property listing.
+
+    @param payload Property fields.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Created property.
+    """
     property_obj = Property(
         title=payload.title,
         address=payload.address,
@@ -71,6 +102,15 @@ def update_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Property:
+    """@brief Fully replace an existing property.
+
+    @param property_id Property identifier.
+    @param payload New property fields.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Updated property.
+    @raises HTTPException 404 if the property does not exist.
+    """
     property_obj = db.get(Property, property_id)
     if property_obj is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
@@ -93,6 +133,13 @@ def delete_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> None:
+    """@brief Delete a property and clear tenant assignments to it.
+
+    @param property_id Property identifier.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @raises HTTPException 404 if the property does not exist.
+    """
     property_obj = db.get(Property, property_id)
     if property_obj is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")

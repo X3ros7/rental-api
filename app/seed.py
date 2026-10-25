@@ -1,3 +1,7 @@
+"""@package app.seed
+@brief Demo data seeding for local development.
+"""
+
 from sqlalchemy.orm import Session
 
 from app.auth import get_user_by_email, hash_password
@@ -5,6 +9,13 @@ from app.models import Property, Tenant, User
 
 
 def seed_demo_data(db: Session) -> None:
+    """@brief Insert demo admin, properties, and tenants if the database is empty.
+
+    Creates the default admin user ``admin@rentai.local`` and sample
+    property/tenant records on the first application start.
+
+    @param db Database session used for inserts.
+    """
     if get_user_by_email(db, "admin@rentai.local") is None:
         db.add(
             User(

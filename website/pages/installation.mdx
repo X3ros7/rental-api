@@ -24,6 +24,22 @@ After startup, the API is available at `http://127.0.0.1:8000`.
 
 Interactive API documentation is available at `/docs`, and the OpenAPI schema at `/openapi.json`.
 
+## Code documentation (Doxygen)
+
+Internal API code docs are generated with Doxygen from Python docstrings.
+
+```bash
+doxygen Doxyfile
+```
+
+Or on Windows:
+
+```powershell
+.\scripts\generate_doxygen.ps1
+```
+
+Open `docs/doxygen/html/index.html` in a browser.
+
 ## Python SDK
 
 The generated Python SDK is located in the `sdk` directory of the project.

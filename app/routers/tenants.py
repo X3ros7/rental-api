@@ -1,3 +1,7 @@
+"""@package app.routers.tenants
+@brief CRUD endpoints for tenants, plus property assign/unassign.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +14,12 @@ router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 
 def _ensure_property_exists(db: Session, property_id: int | None) -> None:
+    """@brief Validate that a property ID exists when it is provided.
+
+    @param db Database session.
+    @param property_id Optional property identifier.
+    @raises HTTPException 404 if ``property_id`` is set but not found.
+    """
     if property_id is None:
         return
     if db.get(Property, property_id) is None:
@@ -21,6 +31,12 @@ def list_tenants(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> list[Tenant]:
+    """@brief List all tenants.
+
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Tenants ordered by ID.
+    """
     return db.query(Tenant).order_by(Tenant.id).all()
 
 
@@ -30,6 +46,14 @@ def get_tenant(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Tenant:
+    """@brief Get a tenant by ID.
+
+    @param tenant_id Tenant identifier.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Requested tenant.
+    @raises HTTPException 404 if the tenant does not exist.
+    """
     tenant = db.get(Tenant, tenant_id)
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
@@ -42,6 +66,15 @@ def create_tenant(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Tenant:
+    """@brief Create a new tenant.
+
+    @param payload Tenant fields.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Created tenant.
+    @raises HTTPException 409 if the email is already used.
+    @raises HTTPException 404 if ``propertyId`` does not exist.
+    """
     existing = db.query(Tenant).filter(Tenant.email == payload.email).first()
     if existing is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -68,6 +101,16 @@ def update_tenant(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Tenant:
+    """@brief Fully replace an existing tenant.
+
+    @param tenant_id Tenant identifier.
+    @param payload New tenant fields.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Updated tenant.
+    @raises HTTPException 404 if the tenant or property does not exist.
+    @raises HTTPException 409 if the email belongs to another tenant.
+    """
     tenant = db.get(Tenant, tenant_id)
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
@@ -95,6 +138,13 @@ def delete_tenant(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> None:
+    """@brief Delete a tenant.
+
+    @param tenant_id Tenant identifier.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @raises HTTPException 404 if the tenant does not exist.
+    """
     tenant = db.get(Tenant, tenant_id)
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
@@ -110,6 +160,18 @@ def assign_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Tenant:
+    """@brief Assign an available property to a tenant.
+
+    Marks the property as unavailable after a successful assignment.
+
+    @param tenant_id Tenant identifier.
+    @param payload Object containing ``propertyId``.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Updated tenant with assigned property.
+    @raises HTTPException 404 if tenant or property is missing.
+    @raises HTTPException 409 if the property is not available.
+    """
     tenant = db.get(Tenant, tenant_id)
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
@@ -134,6 +196,16 @@ def unassign_property(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> Tenant:
+    """@brief Remove the property assignment from a tenant.
+
+    If a property was assigned, it becomes available again.
+
+    @param tenant_id Tenant identifier.
+    @param db Database session.
+    @param _ Authenticated user (authorization only).
+    @return Updated tenant without a property assignment.
+    @raises HTTPException 404 if the tenant does not exist.
+    """
     tenant = db.get(Tenant, tenant_id)
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")

@@ -8,3 +8,6 @@ venv/
 .idea/
 .vscode/
 .pytest_cache/
+docs/doxygen/html/
+docs/doxygen/latex/
+docs/doxygen/xml/

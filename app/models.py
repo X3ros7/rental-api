@@ -1,3 +1,7 @@
+"""@package app.models
+@brief SQLAlchemy ORM models: User, Property, and Tenant.
+"""
+
 from sqlalchemy import Boolean, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -5,6 +9,14 @@ from app.database import Base
 
 
 class User(Base):
+    """@brief Registered API user used for JWT authentication.
+
+    @var id Unique identifier.
+    @var email Unique login email.
+    @var hashed_password Bcrypt password hash.
+    @var full_name Display name of the user.
+    """
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -14,6 +26,18 @@ class User(Base):
 
 
 class Property(Base):
+    """@brief Rental property listing.
+
+    @var id Unique identifier.
+    @var title Listing title.
+    @var address Street address.
+    @var city City name.
+    @var price_per_month Monthly rent amount.
+    @var bedrooms Number of bedrooms.
+    @var available Whether the property is available for rent.
+    @var tenants Related tenant records.
+    """
+
     __tablename__ = "properties"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -28,6 +52,17 @@ class Property(Base):
 
 
 class Tenant(Base):
+    """@brief Tenant (renter) entity.
+
+    @var id Unique identifier.
+    @var first_name Given name.
+    @var last_name Family name.
+    @var email Unique contact email.
+    @var phone Phone number.
+    @var property_id Optional FK to the assigned property.
+    @var property Related property entity, if assigned.
+    """
+
     __tablename__ = "tenants"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
